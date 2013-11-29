@@ -1,0 +1,58 @@
+#edit-mode: -*- python -*-
+#coding:gbk
+
+#工作路径.
+WORKROOT('../../../../')
+
+
+
+#使用硬链接copy.
+CopyUsingHardLink(True)
+
+#C预处理器参数.
+CPPFLAGS('-D_GNU_SOURCE -D__STDC_LIMIT_MACROS -DVERSION=\\\"1.0.0.0\\\"')
+CFLAGS('-g -pipe -W -Wall -fPIC')
+#C++编译参数.
+CXXFLAGS('-g -pipe -W -Wall -fPIC')
+
+#头文件路径.
+INCPATHS('./ ../ ./libs/glog/include ./ ../ ./libs/bhook/include')
+
+#使用库
+LIBS(GLOB('../../lib/*.a'))
+
+#链接参数.
+LDFLAGS('-lpthread -lz -ldl -fPIC ')
+
+#依赖模块
+CONFIGS('thirdsrc/protobuf@base')
+CONFIGS('public/sofa-pbrpc@1.0.0.19148@COMAKE')
+CONFIGS('thirdsrc/gflags@gflags_1-6-0-100_PD_BL_MAIN')
+
+out_dir='./output'
+bin_dir='./output/bin'
+lib_dir='./output/lib'
+
+
+header_sources='perform_show.h perform_helper.h fd_control.h common.h cpu_control.h mem_control.h control_manager.h processor_control.h net/net_control.h net/net_server.h disk/disk_write.h process/pid_control.h net/port_control.h hook/hook_helper.h'
+cpp_sources='perform_show.cpp perform_helper.cpp fd_control.cpp common.cpp cpu_control.cpp mem_control.cpp control_manager.cpp processor_control.cpp net/net_tools.proto net/net_control.cpp net/net_server.cpp disk/disk_write.cpp process/pid_control.cpp net/port_control.cpp hook/hook_helper.cpp ak_flags.cpp'
+
+
+#可执行文件
+
+StaticLibrary('angry_killer', OutputPath(lib_dir), Sources(cpp_sources),HeaderFiles(header_sources))
+SharedLibrary('akhook', OutputPath(lib_dir),LinkDeps(True),
+    Libraries("./libs/bhook/lib/libbhook.a"),
+    Sources("hook/htest2.cpp hook/hook_helper.cpp ak_flags.cpp"))
+    #HeaderFiles("./libs/bhook/include"))
+    #HeaderFiles("./libs/bhook/include"))
+
+Application('angry_killer',Sources('angry_killer.cpp'),OutputPath(bin_dir),Libraries('./output/lib/libangry_killer.a ./libs/glog/lib/libglog.a ./libs/bhook/lib/libbhook.a'))
+
+##add by xingkai
+TARGET('output_bin',
+	ShellCommands('mkdir -p output/bin/',
+		      'cp -r libs/bhook/scripts/bhook output/bin/akhook',
+		      'cp -r libakhook.so output/bin/'),
+	CleanCommands('rm -fr output/bin/hook output/bin/libakhook.so')
+	)

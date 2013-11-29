@@ -1,0 +1,19 @@
+
+option cc_generic_services = true;
+option java_generic_services = true;
+
+message TransRequest {
+    required bytes key = 1;
+    required int64 key_size = 2;
+}
+
+message TransResponse {
+    optional bytes key = 1;
+    optional int64 key_size = 2;
+}
+
+service NetTools {
+    rpc trans(TransRequest) returns(TransResponse);
+}
+
+
